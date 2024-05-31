@@ -11,8 +11,14 @@ hex2bin_box = {'0': '0000', '1': '0001', '2': '0010', '3': '0011',
 matrix_trans = lambda str, box: ''.join(str[i - 1] for i in box)
 # 16进制串转2进制串
 hex2bin = lambda x: ''.join(hex2bin_box[i] for i in x)
+# 2进制串转16进制串
+bin2hex = lambda input: ''.join(hex(int(input[i:i+4], 2))[2:] for i in range(0, len(input), 4))
 # 二进制串异或
 xor_bin = lambda a, b: hex2bin(hex(int(a, 2) ^ int(b, 2))[2:]).rjust(len(a), '0')
+# 去除奇偶校验位
+purify = lambda key: ''.join(key[i:i+7] for i in range(0, 64, 8))
+# 增加奇偶校验位
+depurify = lambda key: ''.join(key[i:i+7] + str(key[i:i+7].count('1') & 1 ^ 1) for i in range(0, 56, 7))
 
 move = [1, 2, 4, 6, 8, 10, 12, 14, 15, 17, 19, 21, 23, 25, 27, 28]
 
@@ -110,8 +116,11 @@ def DES_CRYPT(ori_key, P, flag):
 
     return L + R
 
+
+
 if __name__ == '__main__':
     k = "1A624C89520DEC46"
     P = "748502CD38451097"
+
     result = DES_CRYPT(k, P, 0)
-    print(result)
+    print(bin2hex(result))

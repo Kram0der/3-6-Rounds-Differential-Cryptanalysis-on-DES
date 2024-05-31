@@ -6,7 +6,7 @@ inv_p = [9, 17, 23, 31, 13, 28, 2, 18,
          8, 14, 25, 3, 4, 29, 11, 19,
          32, 12, 22, 7, 5, 27, 15, 21]
 
-child_key = [{} for i in range(8)]
+possible_key = [{} for i in range(8)]
 # S盒差分表
 S_box_diff_table = [[[
             [] for _ in range(16)
@@ -30,25 +30,33 @@ def DES_diff_round(P1, P2, C1, C2):
 
     L0, L0_ = P1[:32], P2[:32]
     R0, R0_ = P1[32:], P2[32:]
-    Ln, Ln_ = C1[:32], C2[:32]
-    Rn, Rn_ = C1[32:], C2[32:]
+    L3, L3_ = C1[:32], C2[:32]
+    R3, R3_ = C1[32:], C2[32:]
 
-    in_xor = matrix_trans(xor_bin(Ln, Ln_), DES.expand_e)
-    out_xor = matrix_trans(xor_bin(xor_bin(L0, L0_), xor_bin(Rn, Rn_)), inv_p)
-    E = matrix_trans(Ln, DES.expand_e)
+    in_xor = matrix_trans(xor_bin(L3, L3_), expand_e)
+    out_xor = matrix_trans(xor_bin(xor_bin(L0, L0_), xor_bin(R3, R3_)), inv_p)
+    E = matrix_trans(L3, expand_e)
 
     for i in range(8):
         idx0 = i << 2
         idx1 = idx0 + (i << 1)
         for input in S_box_diff_table[i][int(in_xor[idx1:idx1 + 6], 2)][int(out_xor[idx0:idx0 + 4], 2)]:
             key = input ^ int(E[idx1:idx1 + 6], 2)
-            if key in child_key[i]:
-                child_key[i][key] += 1
+            if key in possible_key[i]:
+                possible_key[i][key] += 1
             else:
-                child_key[i][key] = 1
+                possible_key[i][key] = 1
 
 def get_key():
-    round_key = ''
+    child_key = ''
+    for i in range(8):
+        for key in possible_key[i]:
+            if possible_key[i][key] == 5:
+                child_key += ''.join(bin(key)[2:].rjust(6, '0'))
+    # print(child_key)
+    key = ['2']*56
+    for i in range(48):
+        key[perm_matrix_after[i] - 1] = child_key[i]
 
 
 if __name__ == '__main__':
@@ -62,6 +70,6 @@ if __name__ == '__main__':
 
     for i in range(0, 10, 2):
         DES_diff_round(P_C[i][0], P_C[i + 1][0], P_C[i][1], P_C[i + 1][1])
-
+    get_key()
     print(1)
 
