@@ -17,8 +17,6 @@ bin2hex = lambda input: ''.join(hex(int(input[i:i+4], 2))[2:] for i in range(0, 
 xor_bin = lambda a, b: hex2bin(hex(int(a, 2) ^ int(b, 2))[2:]).rjust(len(a), '0')
 # 去除奇偶校验位
 purify = lambda key: ''.join(key[i:i+7] for i in range(0, 64, 8))
-# 增加奇偶校验位
-depurify = lambda key: ''.join(key[i:i+7] + str(key[i:i+7].count('1') & 1 ^ 1) for i in range(0, 64, 8))
 
 move = [1, 2, 4, 6, 8, 10, 12, 14, 15, 17, 19, 21, 23, 25, 27, 28]
 

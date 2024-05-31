@@ -81,17 +81,19 @@ def get_key(P, C):
             key = ['*'] * 64
             for i in range(56):
                 key[perm_matrix_before[i] - 1] = temp_key[i]
-            key = depurify(''.join(key))
+            key = ''.join(key)
+            # 增加奇偶校验位
+            key = ''.join(key[i:i + 7] + str(key[i:i + 7].count('0') & 1) for i in range(0, 64, 8))
             return bin2hex(key).upper()
 
 
 if __name__ == '__main__':
     get_S_box_diff_table()
 
-    P_C = [('748502CD38451097', '03C70306D8A09F10'), ('3874756438451097', '78560A0960E6D4CB'),
-           ('486911026ACDFF31', '45FA285BE5ADC730'), ('375BD31F6ACDFF31', '134F7915AC253457'),
-           ('357418DA013FEC86', 'D8A31B2F28BBC5CF'), ('12549847013FEC86', '0F317AC2B23CB944')]
+    P_C_pairs = [('748502CD38451097', '03C70306D8A09F10'), ('3874756438451097', '78560A0960E6D4CB'),
+                 ('486911026ACDFF31', '45FA285BE5ADC730'), ('375BD31F6ACDFF31', '134F7915AC253457'),
+                 ('357418DA013FEC86', 'D8A31B2F28BBC5CF'), ('12549847013FEC86', '0F317AC2B23CB944')]
 
     for i in range(0, pairs << 1, 2):
-        DES_diff_round(P_C[i][0], P_C[i + 1][0], P_C[i][1], P_C[i + 1][1])
+        DES_diff_round(P_C_pairs[i][0], P_C_pairs[i + 1][0], P_C_pairs[i][1], P_C_pairs[i + 1][1])
     print(get_key('748502CD38451097', '03C70306D8A09F10'))
