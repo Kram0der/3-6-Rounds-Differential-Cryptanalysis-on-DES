@@ -47,16 +47,40 @@ def DES_diff_round(P1, P2, C1, C2):
             else:
                 possible_key[i][key] = 1
 
-def get_key():
+def get_key(P, C):
     child_key = ''
+    # 选出达到阈值的key
     for i in range(8):
         for key in possible_key[i]:
             if possible_key[i][key] == 5:
                 child_key += ''.join(bin(key)[2:].rjust(6, '0'))
     # print(child_key)
-    key = ['2']*56
+    # 矩阵变换 循环右移
+    key = ['*']*56
     for i in range(48):
         key[perm_matrix_after[i] - 1] = child_key[i]
+    mov = move[2]
+    key = key[28-mov:28] + key[:28-mov] + key[-mov:] + key[28:56-mov]
+
+    # 需要填充的位置
+    empty = []
+    for i in range(56):
+        if key[i] == '*':
+            empty.append(i)
+
+    temp_key = ''
+    for i in range(1 << 8):
+        rand = ''.join(bin(i)[2:].rjust(8, '0'))
+        for j in range(8):
+            key[empty[j]] = rand[j]
+        temp_key = ''.join(key)
+        print(temp_key)
+        if DES_3round_test(temp_key, P) == C.lower():
+            key = ['*'] * 64
+            for i in range(56):
+                key[perm_matrix_before[i] - 1] = temp_key[i]
+            key = depurify(''.join(key))
+            return bin2hex(key).upper()
 
 
 if __name__ == '__main__':
@@ -70,6 +94,6 @@ if __name__ == '__main__':
 
     for i in range(0, 10, 2):
         DES_diff_round(P_C[i][0], P_C[i + 1][0], P_C[i][1], P_C[i + 1][1])
-    get_key()
-    print(1)
+    print(get_key('5E870BA0B559A8CF', '71BF939C0CEEE3B1'))
+
 

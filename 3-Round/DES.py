@@ -18,7 +18,7 @@ xor_bin = lambda a, b: hex2bin(hex(int(a, 2) ^ int(b, 2))[2:]).rjust(len(a), '0'
 # 去除奇偶校验位
 purify = lambda key: ''.join(key[i:i+7] for i in range(0, 64, 8))
 # 增加奇偶校验位
-depurify = lambda key: ''.join(key[i:i+7] + str(key[i:i+7].count('1') & 1 ^ 1) for i in range(0, 56, 7))
+depurify = lambda key: ''.join(key[i:i+7] + str(key[i:i+7].count('1') & 1 ^ 1) for i in range(0, 64, 8))
 
 move = [1, 2, 4, 6, 8, 10, 12, 14, 15, 17, 19, 21, 23, 25, 27, 28]
 
@@ -114,13 +114,23 @@ def DES_CRYPT(ori_key, P, flag):
         temp = matrix_trans(temp, p)
         L, R = R, xor_bin(temp, L)
 
-    return L + R
+    return bin2hex(L + R)
 
+# 三轮DES测试
+def DES_3round_test(key, P):
+    key_round = [[] for i in range(3)]
+    for i in range(3):
+        mov = move[i]
+        tmp = key[mov:28] + key[:mov] + key[28 + mov:] + key[28:28 + mov]
+        key_round[i] = matrix_trans(tmp, perm_matrix_after)
 
+    P = hex2bin(P.lower())
+    L, R = P[:32], P[32:]
 
-if __name__ == '__main__':
-    k = "1A624C89520DEC46"
-    P = "748502CD38451097"
+    for _ in range(3):
+        temp = xor_bin(matrix_trans(R, expand_e), key_round[_])
+        temp = ''.join(bin(S_box(i, int(temp[i * 6:i * 6 + 6], 2)))[2:].rjust(4, '0') for i in range(8))
+        temp = matrix_trans(temp, p)
+        L, R = R, xor_bin(temp, L)
 
-    result = DES_CRYPT(k, P, 0)
-    print(bin2hex(result))
+    return bin2hex(L + R)
