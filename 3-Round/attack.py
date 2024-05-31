@@ -1,5 +1,7 @@
 from DES import *
 
+#明密文对数
+pairs = 3
 # 置换矩阵P的逆矩阵
 inv_p = [9, 17, 23, 31, 13, 28, 2, 18,
          24, 16, 30, 6, 26, 20, 10, 1,
@@ -52,7 +54,7 @@ def get_key(P, C):
     # 选出达到阈值的key
     for i in range(8):
         for key in possible_key[i]:
-            if possible_key[i][key] == 5:
+            if possible_key[i][key] == pairs:
                 child_key += ''.join(bin(key)[2:].rjust(6, '0'))
     # print(child_key)
     # 矩阵变换 循环右移
@@ -74,7 +76,7 @@ def get_key(P, C):
         for j in range(8):
             key[empty[j]] = rand[j]
         temp_key = ''.join(key)
-        print(temp_key)
+        # print(temp_key)
         if DES_3round_test(temp_key, P) == C.lower():
             key = ['*'] * 64
             for i in range(56):
@@ -86,14 +88,10 @@ def get_key(P, C):
 if __name__ == '__main__':
     get_S_box_diff_table()
 
-    P_C = [('5E870BA0B559A8CF', '71BF939C0CEEE3B1'), ('E7C1F970B559A8CF', 'EAA6CE7BC9DB808B'),
-           ('5D6F0803ED9FAC45', 'D99FDDD5A3016E53'), ('1EB2B007ED9FAC45', 'B49E2F61B4172078'),
-           ('7ECF80BD2FE0EA99', 'C9BE22F6DA261B9A'), ('8B2CBE002FE0EA99', '2360C6F9ACD3982D'),
-           ('97D2078984F010B4', '719849F28E5313BF'), ('4A5C783384F010B4', 'E4DDEEDB66776D42'),
-           ('641E10E96186B8A0', '7918C1C6400F4AA2'), ('CA4E94596186B8A0', 'B8D0DC72CD2F6579')]
+    P_C = [('748502CD38451097', '03C70306D8A09F10'), ('3874756438451097', '78560A0960E6D4CB'),
+           ('486911026ACDFF31', '45FA285BE5ADC730'), ('375BD31F6ACDFF31', '134F7915AC253457'),
+           ('357418DA013FEC86', 'D8A31B2F28BBC5CF'), ('12549847013FEC86', '0F317AC2B23CB944')]
 
-    for i in range(0, 10, 2):
+    for i in range(0, pairs << 1, 2):
         DES_diff_round(P_C[i][0], P_C[i + 1][0], P_C[i][1], P_C[i + 1][1])
-    print(get_key('5E870BA0B559A8CF', '71BF939C0CEEE3B1'))
-
-
+    print(get_key('748502CD38451097', '03C70306D8A09F10'))
