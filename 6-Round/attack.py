@@ -8,8 +8,22 @@ inv_p = [9, 17, 23, 31, 13, 28, 2, 18,
          8, 14, 25, 3, 4, 29, 11, 19,
          32, 12, 22, 7, 5, 27, 15, 21]
 
-effective_key = [[1, 4, 5, 6, 7], [0, 1, 3, 4, 5]]
+effective_position = [[1, 4, 5, 6, 7], [0, 1, 3, 4, 5]]
 possible_key = [[{} for i in range(8)] for i in range(2)]
+real_key = ''
+# 合并两个密钥
+def general(a, b):
+    global real_key
+    for i, j in zip(a, b):
+        if i == '*':
+            real_key += j
+        elif j == '*':
+            real_key += i
+        else:
+            if not i == j:
+                return False
+            real_key += i
+    return True
 # S盒差分表
 S_box_diff_table = [[[
     [] for _ in range(16)
@@ -45,7 +59,7 @@ def DES_diff_round(PC, k):
 
     E = matrix_trans(L6, expand_e)
 
-    for i in effective_key[k]:
+    for i in effective_position[k]:
         idx0 = i << 2
         idx1 = idx0 + (i << 1)
         for input in S_box_diff_table[i][int(in_xor[idx1:idx1 + 6], 2)][int(out_xor[idx0:idx0 + 4], 2)]:
@@ -56,18 +70,24 @@ def DES_diff_round(PC, k):
                 possible_key[k][i][key] = 1
 
 
-def get_key(P, C):
-    child_key = ''
+def get_key():
+    child_key = ['', '']
     # 选出达到阈值的key
-    for i in range(8):
-        for key in possible_key[i]:
-            if possible_key[i][key] == pairs:
-                child_key += ''.join(bin(key)[2:].rjust(6, '0'))
+    for i in range(2):
+        for j in range(8):
+            if j not in effective_position[i]:
+                child_key[i] += '*'*6
+            else:
+                child_key[i] += bin(possible_key[i][j][0][0])[2:].rjust(6, '0')
     # print(child_key)
     # 矩阵变换 循环右移
+    if not general(child_key[0], child_key[1]):
+        return False
+
     key = ['*'] * 56
     for i in range(48):
-        key[perm_matrix_after[i] - 1] = child_key[i]
+        key[perm_matrix_after[i] - 1] = real_key[i]
+    print(key)
     mov = move[5]
     key = key[28 - mov:28] + key[:28 - mov] + key[-mov:] + key[28:56 - mov]
 
@@ -104,19 +124,22 @@ if __name__ == '__main__':
         for i in range(pairs):
             DES_diff_round(PC_pairs[i], _)
 
-    # for i in range(2):
-    #     for j in range(8):
-    #         possible_key[i][j] = dict(sorted(possible_key[i][j].items(), key=lambda x:x[1], reverse=True))
+    for i in range(2):
+        for j in range(8):
+            possible_key[i][j] = sorted(possible_key[i][j].items(), key=lambda x:x[1], reverse=True)
+
+    get_key()
+    # print(possible_key[0][1])
 
 
-    with open("possible_key.txt", "w") as f:
-        for i in range(2):
-            f.write(f"\n{i + 1}:\n")
-            for j in range(8):
-                possible_key[i][j] = dict(sorted(possible_key[i][j].items(), key=lambda x:x[1], reverse=True))
-                f.write("\n")
-                f.write(str(possible_key[i][j]))
-            f.write("\n")
+    # with open("possible_key.txt", "w") as f:
+    #     for i in range(2):
+    #         f.write(f"\n{i + 1}:\n")
+    #         for j in range(8):
+    #             possible_key[i][j] = dict(sorted(possible_key[i][j].items(), key=lambda x:x[1], reverse=True))
+    #             f.write("\n")
+    #             f.write(str(possible_key[i][j]))
+    #         f.write("\n")
 
     # key = '1' * 12 + '*' * 6 + '1' * 30
     # ori_key = ['*'] * 56
