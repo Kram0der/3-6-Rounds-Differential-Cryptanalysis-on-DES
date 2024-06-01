@@ -1,14 +1,16 @@
 from DES import *
 
 # 明密文对数
-pairs = 3
+pairs = 5
 # 置换矩阵P的逆矩阵
 inv_p = [9, 17, 23, 31, 13, 28, 2, 18,
          24, 16, 30, 6, 26, 20, 10, 1,
          8, 14, 25, 3, 4, 29, 11, 19,
          32, 12, 22, 7, 5, 27, 15, 21]
-
-possible_key = [{} for i in range(8)]
+# 圈特征
+Feature = [hex2bin("4008000004000000"),hex2bin("0020000800000400")]
+effective_key = [[1,4,5,6,7],[0,1,3,4,5]]
+possible_key = [[{} for i in range(8)] for i in range(2)]
 # S盒差分表
 S_box_diff_table = [[[
     [] for _ in range(16)
@@ -24,9 +26,8 @@ def get_S_box_diff_table():
                 out_xor = S_box(i, x) ^ S_box(i, x ^ in_xor)
                 S_box_diff_table[i][in_xor][out_xor].append(x)
 
-
 # 一轮差分分析，传入两组明密文对
-def DES_diff_round(P1, P2, C1, C2):
+def DES_diff_round(P1, P2, C1, C2, k):
     P1 = hex2bin(P1.lower())
     P2 = hex2bin(P2.lower())
     C1 = hex2bin(C1.lower())
@@ -34,22 +35,25 @@ def DES_diff_round(P1, P2, C1, C2):
 
     L0, L0_ = P1[:32], P2[:32]
     R0, R0_ = P1[32:], P2[32:]
-    L3, L3_ = C1[:32], C2[:32]
-    R3, R3_ = C1[32:], C2[32:]
+    L6, L6_ = C1[:32], C2[:32]
+    R6, R6_ = C1[32:], C2[32:]
 
-    in_xor = matrix_trans(xor_bin(L3, L3_), expand_e)
-    out_xor = matrix_trans(xor_bin(xor_bin(L0, L0_), xor_bin(R3, R3_)), inv_p)
-    E = matrix_trans(L3, expand_e)
+    in_xor = matrix_trans(xor_bin(L6, L6_), expand_e)
+    out_xor = matrix_trans(xor_bin(xor_bin(R6, R6_), Feature[k][32:]), inv_p)
 
-    for i in range(8):
+    E = matrix_trans(L6, expand_e)
+
+    for i in effective_key:
         idx0 = i << 2
         idx1 = idx0 + (i << 1)
         for input in S_box_diff_table[i][int(in_xor[idx1:idx1 + 6], 2)][int(out_xor[idx0:idx0 + 4], 2)]:
             key = input ^ int(E[idx1:idx1 + 6], 2)
-            if key in possible_key[i]:
-                possible_key[i][key] += 1
+            if key in possible_key[k][i]:
+                possible_key[k][i][key] += 1
             else:
-                possible_key[i][key] = 1
+                possible_key[k][i][key] = 1
+
+def get_PC_pairs(i, n):
 
 
 def get_key(P, C):
@@ -64,7 +68,7 @@ def get_key(P, C):
     key = ['*'] * 56
     for i in range(48):
         key[perm_matrix_after[i] - 1] = child_key[i]
-    mov = move[2]
+    mov = move[5]
     key = key[28 - mov:28] + key[:28 - mov] + key[-mov:] + key[28:56 - mov]
 
     # 需要填充的位置
@@ -93,23 +97,22 @@ def get_key(P, C):
 if __name__ == '__main__':
     get_S_box_diff_table()
 
-    key = '1' * 12 + '*' * 6 + '1' * 30
-    ori_key = ['*'] * 56
-    for i in range(48):
-        ori_key[perm_matrix_after[i] - 1] = key[i]
-    mov = move[5]
-    ori_key = ori_key[28 - mov:28] + ori_key[:28 - mov] + ori_key[-mov:] + ori_key[28:56 - mov]
-    print("key:\t", ''.join(ori_key))
-    round = 1
-    mov = move[round - 1]
-    tmp = ori_key[mov:28] + ori_key[:mov] + ori_key[28 + mov:] + ori_key[28:28 + mov]
-    print(f"第{round}轮密钥:\t" + ' '.join(matrix_trans(tmp, perm_matrix_after)[i:i + 6] for i in range(0, 48, 6)))
-    round = 3
-    mov = move[round - 1]
-    tmp = ori_key[mov:28] + ori_key[:mov] + ori_key[28 + mov:] + ori_key[28:28 + mov]
-    print(f"第{round}轮密钥:\t" + ' '.join(matrix_trans(tmp, perm_matrix_after)[i:i + 6] for i in range(0, 48, 6)))
+    # key = '1' * 12 + '*' * 6 + '1' * 30
+    # ori_key = ['*'] * 56
+    # for i in range(48):
+    #     ori_key[perm_matrix_after[i] - 1] = key[i]
+    # mov = move[5]
+    # ori_key = ori_key[28 - mov:28] + ori_key[:28 - mov] + ori_key[-mov:] + ori_key[28:56 - mov]
+    # print("key:\t", ''.join(ori_key))
+    # round = 1
+    # mov = move[round - 1]
+    # tmp = ori_key[mov:28] + ori_key[:mov] + ori_key[28 + mov:] + ori_key[28:28 + mov]
+    # print(f"第{round}轮密钥:\t" + ' '.join(matrix_trans(tmp, perm_matrix_after)[i:i + 6] for i in range(0, 48, 6)))
+    # round = 3
+    # mov = move[round - 1]
+    # tmp = ori_key[mov:28] + ori_key[:mov] + ori_key[28 + mov:] + ori_key[28:28 + mov]
+    # print(f"第{round}轮密钥:\t" + ' '.join(matrix_trans(tmp, perm_matrix_after)[i:i + 6] for i in range(0, 48, 6)))
 
-    # print()
     # input = matrix_trans(hex2bin("00006000"), expand_e)
     # output = matrix_trans(hex2bin("20000080"), inv_p)
     # for i in range(8):
