@@ -15,4 +15,4 @@ def xor_bin(a, b):
 # 16进制串异或
 def xor_hex(a, b):
     assert len(a) == len(b)
-    return ''.join(hex(int(x, 16) ^ int(y, 16)) for x, y in zip(a, b))
+    return hex(int(b, 16) ^ int(a, 16))[2:].rjust(len(a), '0')
