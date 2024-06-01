@@ -104,19 +104,19 @@ if __name__ == '__main__':
         for i in range(pairs):
             DES_diff_round(PC_pairs[i], _)
 
-    for i in range(2):
-        for j in range(8):
-            possible_key[i][j] = dict(sorted(possible_key[i][j].items(), key=lambda x:x[1], reverse=True))
+    # for i in range(2):
+    #     for j in range(8):
+    #         possible_key[i][j] = dict(sorted(possible_key[i][j].items(), key=lambda x:x[1], reverse=True))
 
 
-    # with open("possible_key.txt", "w") as f:
-    #     for i in range(2):
-    #         f.write(f"{i + 1}:\n")
-    #         for j in range(8):
-    #             possible_key[i][j] = dict(sorted(possible_key[i][j].items(), key=lambda x:x[1], reverse=True))
-    #             f.write("\n")
-    #             f.write(str(possible_key[i][j]))
-    #         f.write("\n")
+    with open("possible_key.txt", "w") as f:
+        for i in range(2):
+            f.write(f"\n{i + 1}:\n")
+            for j in range(8):
+                possible_key[i][j] = dict(sorted(possible_key[i][j].items(), key=lambda x:x[1], reverse=True))
+                f.write("\n")
+                f.write(str(possible_key[i][j]))
+            f.write("\n")
 
     # key = '1' * 12 + '*' * 6 + '1' * 30
     # ori_key = ['*'] * 56
