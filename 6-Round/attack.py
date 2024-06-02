@@ -132,8 +132,8 @@ if __name__ == '__main__':
     if get_key():
         print("攻击成功\n密钥为:\t",real_key)
         print("耗时为:\t", time.time() - start)
-    # print(possible_key[0][1])
-
+    else:
+        print("攻击失败")
 
     # with open("possible_key.txt", "w") as f:
     #     for i in range(2):
