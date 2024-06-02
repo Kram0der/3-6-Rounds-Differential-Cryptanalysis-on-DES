@@ -1,5 +1,5 @@
 import random
-
+import time
 from DES import *
 
 # 置换矩阵P的逆矩阵
@@ -72,7 +72,7 @@ def DES_diff_round(PC, k):
 
 def get_key():
     child_key = ['', '']
-    # 选出达到阈值的key
+    global real_key
     for i in range(2):
         for j in range(8):
             if j not in effective_position[i]:
@@ -80,14 +80,13 @@ def get_key():
             else:
                 child_key[i] += bin(possible_key[i][j][0][0])[2:].rjust(6, '0')
     # print(child_key)
-    # 矩阵变换 循环右移
     if not general(child_key[0], child_key[1]):
         return False
 
     key = ['*'] * 56
     for i in range(48):
         key[perm_matrix_after[i] - 1] = real_key[i]
-    print(key)
+    # print(key)
     mov = move[5]
     key = key[28 - mov:28] + key[:28 - mov] + key[-mov:] + key[28:56 - mov]
 
@@ -96,25 +95,27 @@ def get_key():
     for i in range(56):
         if key[i] == '*':
             empty.append(i)
-
+    l = len(empty)
     temp_key = ''
-    for i in range(1 << 8):
-        rand = ''.join(bin(i)[2:].rjust(8, '0'))
-        for j in range(8):
+    for i in range(1 << l):
+        rand = ''.join(bin(i)[2:].rjust(l, '0'))
+        for j in range(l):
             key[empty[j]] = rand[j]
         temp_key = ''.join(key)
         # print(temp_key)
-        if DES_3round_test(temp_key, P) == C.lower():
+        if DES_6round_test(temp_key, PC_pairs[0][0]) == PC_pairs[0][2].lower():
             key = ['*'] * 64
             for i in range(56):
                 key[perm_matrix_before[i] - 1] = temp_key[i]
-            key = ''.join(key)
+            real_key = ''.join(key)
             # 增加奇偶校验位
-            key = ''.join(key[i:i + 7] + str(key[i:i + 7].count('0') & 1) for i in range(0, 64, 8))
-            return bin2hex(key).upper()
+            real_key = ''.join(real_key[i:i + 7] + str(real_key[i:i + 7].count('0') & 1) for i in range(0, 64, 8))
+            real_key = bin2hex(real_key)
+            return True
 
 
 if __name__ == '__main__':
+    start = time.time()
     get_S_box_diff_table()
     for _ in range(2):
         with open(f"Feature{_}.txt", "r") as f:
@@ -128,7 +129,9 @@ if __name__ == '__main__':
         for j in range(8):
             possible_key[i][j] = sorted(possible_key[i][j].items(), key=lambda x:x[1], reverse=True)
 
-    get_key()
+    if get_key():
+        print("攻击成功\n密钥为:\t",real_key)
+        print("耗时为:\t", time.time() - start)
     # print(possible_key[0][1])
 
 

@@ -135,7 +135,8 @@ Feature = ["4008000004000000", "0020000800000400"]
 Feature_bin = [hex2bin(Feature[0]), hex2bin(Feature[1])]
 if __name__ == '__main__':
     hex_table = "0123456789abcdef"
-    key = ''.join(random.choice(hex_table) for i in range(16))
+    key = hex2bin(''.join(random.choice(hex_table) for i in range(14)))
+    key = bin2hex(''.join(key[i:i + 7] + str(key[i:i + 7].count('0') & 1) for i in range(0, 56, 7)))
     with open("key.txt", "w") as f:
         f.write(key)
     for i in range(2):
