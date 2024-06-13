@@ -103,7 +103,7 @@ def get_key():
             key[empty[j]] = rand[j]
         temp_key = ''.join(key)
         # print(temp_key)
-        if DES_6round_test(temp_key, PC_pairs[0][0]) == PC_pairs[0][2].lower():
+        if DES_Nround_test(temp_key, PC_pairs[0][0]) == PC_pairs[0][2].lower():
             key = ['*'] * 64
             for i in range(56):
                 key[perm_matrix_before[i] - 1] = temp_key[i]
@@ -125,6 +125,7 @@ if __name__ == '__main__':
         for i in range(pairs):
             DES_diff_round(PC_pairs[i], _)
 
+
     for i in range(2):
         for j in range(8):
             possible_key[i][j] = sorted(possible_key[i][j].items(), key=lambda x:x[1], reverse=True)
@@ -134,6 +135,7 @@ if __name__ == '__main__':
         print("耗时为:\t", time.time() - start)
     else:
         print("攻击失败")
+
 
     # with open("possible_key.txt", "w") as f:
     #     for i in range(2):

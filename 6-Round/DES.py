@@ -1,7 +1,6 @@
 #############################################
-###                 六轮DES                ###
+###                 N轮DES                ###
 #############################################
-# DES轮数
 import random
 
 from utils import *
@@ -14,12 +13,6 @@ pairs = 400
 matrix_trans = lambda str, box: ''.join(str[i - 1] for i in box)
 
 move = [1, 2, 4, 6, 8, 10, 12, 14, 15, 17, 19, 21, 23, 25, 27, 28]
-
-# 置换选择矩阵1
-perm_matrix_before = [57, 49, 41, 33, 25, 17, 9, 1, 58, 50, 42, 34, 26, 18,
-                      10, 2, 59, 51, 43, 35, 27, 19, 11, 3, 60, 52, 44, 36,
-                      63, 55, 47, 39, 31, 23, 15, 7, 62, 54, 46, 38, 30, 22,
-                      14, 6, 61, 53, 45, 37, 29, 21, 13, 5, 28, 20, 12, 4]
 
 # 置换选择矩阵2
 perm_matrix_after = [14, 17, 11, 24, 1, 5, 3, 28, 15, 6, 21, 10,
@@ -88,30 +81,8 @@ p = [16, 7, 20, 21, 29, 12, 28, 17,
      19, 13, 30, 6, 22, 11, 4, 25]
 
 
-# flag: 加密 0 解密 1
-def DES_CRYPT(ori_key, P, flag):
-    arr = [range(N), range(N - 1, -1, -1)]
-    key = matrix_trans(hex2bin(ori_key.lower()), perm_matrix_before)
-    key_round = [[] for i in arr[0]]
-    for i in arr[0]:
-        mov = move[i]
-        tmp = key[mov:28] + key[:mov] + key[28 + mov:] + key[28:28 + mov]
-        key_round[i] = matrix_trans(tmp, perm_matrix_after)
-
-    P = hex2bin(P.lower())
-    L, R = P[:32], P[32:]
-
-    for _ in arr[flag]:
-        temp = xor_bin(matrix_trans(R, expand_e), key_round[_])
-        temp = ''.join(bin(S_box(i, int(temp[i * 6:i * 6 + 6], 2)))[2:].rjust(4, '0') for i in range(8))
-        temp = matrix_trans(temp, p)
-        L, R = R, xor_bin(temp, L)
-
-    return bin2hex(L + R)
-
-
-# 六轮DES测试
-def DES_6round_test(key, P):
+# N轮DES测试
+def DES_Nround_test(key, P, N):
     key_round = [[] for i in range(N)]
     for i in range(N):
         mov = move[i]
@@ -135,8 +106,7 @@ Feature = ["4008000004000000", "0020000800000400"]
 Feature_bin = [hex2bin(Feature[0]), hex2bin(Feature[1])]
 if __name__ == '__main__':
     hex_table = "0123456789abcdef"
-    key = hex2bin(''.join(random.choice(hex_table) for i in range(14)))
-    key = bin2hex(''.join(key[i:i + 7] + str(key[i:i + 7].count('0') & 1) for i in range(0, 56, 7)))
+    key = ''.join(random.choice(hex_table) for i in range(14))
     with open("key.txt", "w") as f:
         f.write(key)
     for i in range(2):
@@ -144,6 +114,6 @@ if __name__ == '__main__':
             for j in range(pairs):
                 P = ''.join(random.choice(hex_table) for i in range(16))
                 P_ = xor_hex(P, Feature[i])
-                C = DES_CRYPT(key, P, 0)
-                C_ = DES_CRYPT(key, P_, 0)
+                C = DES_Nround_test(key, P, 0)
+                C_ = DES_Nround_test(key, P_, 0)
                 f.write(' '.join((P, P_, C, C_)) + "\n")
