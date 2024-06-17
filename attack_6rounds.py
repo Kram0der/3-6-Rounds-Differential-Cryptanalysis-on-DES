@@ -3,8 +3,8 @@ import time
 from DES import *
 
 N = 6
-pairs = 150
-# 特征值
+pairs = 300
+# # 特征值
 # Feature = ["4008000004000000", "0020000800000400"]
 # effective_position = [[1, 4, 5, 6, 7], [0, 1, 3, 4, 5]]
 
@@ -124,8 +124,7 @@ def analyze():
 
 
 if __name__ == '__main__':
-
-    hex_table = "0123456789abcdef"
+    hex_table = "0123456789ABCDEF"
     key = ''.join(random.choice(hex_table) for i in range(14))
     for i in range(2):
         for j in range(pairs):
@@ -145,14 +144,43 @@ if __name__ == '__main__':
         for j in range(8):
             possible_key[i][j] = sorted(possible_key[i][j].items(), key=lambda x: x[1], reverse=True)
 
-    print("真实密钥:\t", key.upper())
+    print("真实密钥:\t", key)
     if analyze():
-        print("攻击成功\n密钥为:\t", real_key)
+        print("攻击成功\n攻击结果:\t", real_key)
         print("耗时为:\t{:.2f}s".format(time.time() - start))
     else:
         print("攻击失败")
 
-    # with open("possible_key.txt", "w") as f:
+    # n = 500
+    # success = 0
+    # start = time.time()
+    # for _ in range(n):
+    #     key = ''.join(random.choice(hex_table) for i in range(14))
+    #     for i in range(2):
+    #         for j in range(pairs):
+    #             P = ''.join(random.choice(hex_table) for i in range(16))
+    #             P_ = xor_hex(P, Feature[i])
+    #             C = DES_Nround_test(key, P, N)
+    #             C_ = DES_Nround_test(key, P_, N)
+    #             PC_pairs[i][j] = [P, P_, C, C_]
+    #
+    #     for i in range(2):
+    #         for j in range(pairs):
+    #             DES_diff_round(PC_pairs[i][j], i)
+    #
+    #     for i in range(2):
+    #         for j in range(8):
+    #             possible_key[i][j] = sorted(possible_key[i][j].items(), key=lambda x: x[1], reverse=True)
+    #     if analyze():
+    #         if real_key == key:
+    #             success += 1
+    #     possible_key = [[{} for i in range(8)] for i in range(2)]
+    #     real_key = ''
+    # print(f"明密文对数：\t{pairs}")
+    # print(f"成功率为：\t{success / n:.2%}")
+    # print(f"平均耗时为：\t{(time.time() - start)/n:.2f}s")
+
+    # with open("6rounds_analysis/possible_key.txt", "w") as f:
     #     for i in range(2):
     #         f.write(f"\n{i + 1}:\n")
     #         for j in range(8):
@@ -161,18 +189,3 @@ if __name__ == '__main__':
     #             f.write(str(possible_key[i][j]))
     #         f.write("\n")
 
-    # key = '1' * 12 + '*' * 6 + '1' * 30
-    # ori_key = ['*'] * 56
-    # for i in range(48):
-    #     ori_key[perm_matrix_after[i] - 1] = key[i]
-    # mov = move[5]
-    # ori_key = ori_key[28 - mov:28] + ori_key[:28 - mov] + ori_key[-mov:] + ori_key[28:56 - mov]
-    # print("key:\t", ''.join(ori_key))
-    # round = 1
-    # mov = move[round - 1]
-    # tmp = ori_key[mov:28] + ori_key[:mov] + ori_key[28 + mov:] + ori_key[28:28 + mov]
-    # print(f"第{round}轮密钥:\t" + ' '.join(matrix_trans(tmp, perm_matrix_after)[i:i + 6] for i in range(0, 48, 6)))
-    # round = 3
-    # mov = move[round - 1]
-    # tmp = ori_key[mov:28] + ori_key[:mov] + ori_key[28 + mov:] + ori_key[28:28 + mov]
-    # print(f"第{round}轮密钥:\t" + ' '.join(matrix_trans(tmp, perm_matrix_after)[i:i + 6] for i in range(0, 48, 6)))
