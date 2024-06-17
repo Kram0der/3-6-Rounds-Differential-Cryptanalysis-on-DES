@@ -98,21 +98,3 @@ def DES_Nround_test(key, P, N):
         L, R = R, xor_bin(temp, L)
 
     return bin2hex(L + R)
-
-
-# # 圈特征
-# Feature = ["4008000004000000", "0020000800000400"]
-# Feature_bin = [hex2bin(Feature[0]), hex2bin(Feature[1])]
-# if __name__ == '__main__':
-#     hex_table = "0123456789abcdef"
-#     key = ''.join(random.choice(hex_table) for i in range(14))
-#     with open("key.txt", "w") as f:
-#         f.write(key)
-#     for i in range(2):
-#         with open(f"Feature{i}.txt", "w") as f:
-#             for j in range(pairs):
-#                 P = ''.join(random.choice(hex_table) for i in range(16))
-#                 P_ = xor_hex(P, Feature[i])
-#                 C = DES_Nround_test(key, P, 0)
-#                 C_ = DES_Nround_test(key, P_, 0)
-#                 f.write(' '.join((P, P_, C, C_)) + "\n")
