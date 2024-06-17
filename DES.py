@@ -5,8 +5,6 @@ import random
 
 from utils import *
 
-N = 6
-pairs = 400
 # 去除奇偶校验位
 # purify = lambda key: ''.join(key[i:i+7] for i in range(0, 64, 8))
 # 矩阵置换
@@ -83,6 +81,7 @@ p = [16, 7, 20, 21, 29, 12, 28, 17,
 
 # N轮DES测试
 def DES_Nround_test(key, P, N):
+    key = hex2bin(key.lower())
     key_round = [[] for i in range(N)]
     for i in range(N):
         mov = move[i]
@@ -101,19 +100,19 @@ def DES_Nround_test(key, P, N):
     return bin2hex(L + R)
 
 
-# 圈特征
-Feature = ["4008000004000000", "0020000800000400"]
-Feature_bin = [hex2bin(Feature[0]), hex2bin(Feature[1])]
-if __name__ == '__main__':
-    hex_table = "0123456789abcdef"
-    key = ''.join(random.choice(hex_table) for i in range(14))
-    with open("key.txt", "w") as f:
-        f.write(key)
-    for i in range(2):
-        with open(f"Feature{i}.txt", "w") as f:
-            for j in range(pairs):
-                P = ''.join(random.choice(hex_table) for i in range(16))
-                P_ = xor_hex(P, Feature[i])
-                C = DES_Nround_test(key, P, 0)
-                C_ = DES_Nround_test(key, P_, 0)
-                f.write(' '.join((P, P_, C, C_)) + "\n")
+# # 圈特征
+# Feature = ["4008000004000000", "0020000800000400"]
+# Feature_bin = [hex2bin(Feature[0]), hex2bin(Feature[1])]
+# if __name__ == '__main__':
+#     hex_table = "0123456789abcdef"
+#     key = ''.join(random.choice(hex_table) for i in range(14))
+#     with open("key.txt", "w") as f:
+#         f.write(key)
+#     for i in range(2):
+#         with open(f"Feature{i}.txt", "w") as f:
+#             for j in range(pairs):
+#                 P = ''.join(random.choice(hex_table) for i in range(16))
+#                 P_ = xor_hex(P, Feature[i])
+#                 C = DES_Nround_test(key, P, 0)
+#                 C_ = DES_Nround_test(key, P_, 0)
+#                 f.write(' '.join((P, P_, C, C_)) + "\n")
